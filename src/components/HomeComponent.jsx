@@ -121,7 +121,7 @@ const HomeComponent = () => {
 
             {/* footer section */}
             <footer className="bg-dark text-light text-center py-3">
-                <p className="mb-0">&copy; {new Date().getFullYear()} Masomo School.All Rights Reserved</p>
+                <marquee behavior="" direction=""><p className="mb-0">&copy; {new Date().getFullYear()} Masomo School.All Rights Reserved</p></marquee>
             </footer>
     
             

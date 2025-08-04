@@ -1,0 +1,129 @@
+import React, { useContext, useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { toast,ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import axios from 'axios'
+import { AuthContext } from '../context/AuthContext'
+
+const Classes = () => {
+    const [classes,setClases]=useState([])
+    const {token}=useContext(AuthContext)
+    const navigate=useNavigate()
+    // we prapare our authheader
+    const authHeader={
+        headers: {Authorization:`Bearer ${token}`}
+    }
+
+    // console.log('FetchClasses')
+    const FetchClasses=async () => {
+        try {
+            toast.info("Loading Classes...")
+            const res=await axios.get('https://schoolapi-92n6.onrender.com/api/classroom',authHeader)
+            console.log(res.data)
+            setClases(res.data)
+            toast.dismiss()
+        } catch (error) {
+            toast.dismiss()
+            toast.error(error.response?.data?.message || 'Failed to load classes')
+        }    
+    }
+    
+    // we use the useeffect so that the fetch class function get executed immediately the component has 
+    // been mouted
+    useEffect(()=>{
+        FetchClasses()
+    },[])
+
+    // handle delete function
+    const handleDelete=async (id)=>{
+        if (window.confirm('delete this class?')){
+      try {
+        toast.info("Deleting Class...")
+        const res=await axios.delete(`https://schoolapi-92n6.onrender.com/api/classroom/${id}`,authHeader)
+        toast.dismiss()
+        
+      } catch (error) {
+        toast.dismiss()
+        
+      }
+      }
+  return (
+    <div className=' container mt-2'>
+        <ToastContainer position='top-right' autoClose={3000}/>
+
+        {/* breadcrums provide ease in path location */}
+        <nav aria-label='breadcrumb' className='mb-3'>
+            <ol className='breadcrumb'>
+                <li className='breadcrumb-item fw-bold'><Link to='/admin-dashboard'>Dashboard </Link></li>
+                <li className='breadcrumb-item- active' aria-label='page'> / Classes</li>
+            </ol>
+        </nav>
+
+        {/* card */}
+        <div className="card p-4 shadow-sm">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className='text-success '> 
+                    <i className='bi bi-building me-2'></i>Classes list
+                </h5>
+
+                <button className='btn btn-success'>
+                    <i className='bi bi-plus-circle'></i>Add Class
+                </button>
+            </div>
+            {/* list of the classes */}
+            <div className="table-responsive">
+                {classes.length ===0?(
+                    <div className="alert alert-warning text-center">
+                        <i className='bi bi-exclamation-circle me-2'></i>No Classes Found!!
+                    </div>
+                ):(
+                    <table className='table table-striped table-hover table-bordered'>
+                        <thead className='table-success'>
+                            <tr>
+                                <th>#</th>
+                                <th>Class Name</th>
+                                <th>Grade Level</th>
+                                <th>Class Year</th>
+                                <th>Teacher</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {classes.map((cls, index) => (
+                                <tr key={cls._id}>
+                                    <td>{index + 1}</td>
+                                    <td>{cls.name}</td>
+                                    <td>{cls.gradeLevel}</td>
+                                    <td>{cls.classYear}</td>
+                                    <td>{cls.teacher?.name || 'N/A'}</td>
+                                    <td>{cls.teacher?.phone ||'N/A' } </td>
+                                    <td>
+                                        <button className='btn btn-sm btn-danger me-2'>
+                                            <i className='bi bi-pencil-square'></i>
+
+                                        </button>
+
+                                        <button className='btn btn-sm btn-warning me-2'>
+                                            <i className='bi bi-trash'></i>
+                                        </button>
+                                        onClick={()=>handleDelete(cls._id)}
+                                        <i className='bi bi-eye'></i>
+                                    </td>
+
+                                </tr>
+                            )
+
+                            )}
+                        </tbody>
+
+                    </table>
+                )}
+            </div>
+        </div>
+
+    </div>
+  )
+}
+export default Classes
+
